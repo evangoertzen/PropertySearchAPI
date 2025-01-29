@@ -15,3 +15,8 @@ To run host:
 ```
 uvicorn APIhost:app --host 0.0.0.0 --port 8000
 ```
+
+Required to host/access from same PC for development:
+```
+pip install starlette
+```
