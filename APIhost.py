@@ -10,6 +10,6 @@ def get_random_number():
     return {"random_number": random.randint(1, 100)}
 
 @app.get("/getProperties")
-def get_properties(location: str):
-    return {"properties": ps.propSearch(location)}
+def get_properties(location: str, limit: int):
+    return {"properties": ps.propSearch(location, limit)}
 

@@ -1,6 +1,8 @@
 from homeharvest import scrape_property
 from datetime import datetime
 
+import numpy as np
+
 # allFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id', 'status', 'text', 
 #              'style', 'full_street_line', 'street', 'unit', 'city', 'state', 'zip_code', 'beds',
 #              'full_baths', 'half_baths', 'sqft', 'year_built', 'days_on_mls', 'list_price',
@@ -13,7 +15,14 @@ from datetime import datetime
 #              'office_id', 'office_mls_set', 'office_name', 'office_email', 'office_phones', 
 #              'nearby_schools', 'primary_photo', 'alt_photos']
 
-def propSearch(location: str):
+importantFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id', 'status', 'text', 
+             'style', 'full_street_line', 'street', 'unit', 'city', 'state', 'zip_code', 'beds',
+             'full_baths', 'half_baths', 'sqft', 'year_built', 'days_on_mls', 'list_price',
+             'list_date', 'assessed_value', 'estimated_value', 'tax', 'tax_history', 'lot_sqft',
+             'price_per_sqft', 'latitude', 'longitude', 'county', 'hoa_fee', 'nearby_schools',
+             'primary_photo']
+
+def propSearch(location: str, limit: int):
 
     properties = scrape_property(
         location=location,
@@ -25,16 +34,22 @@ def propSearch(location: str):
         # date_to="2023-05-28",
         # foreclosure=True
         # mls_only=True,  # only fetch MLS listings
-        # limit=1
+        limit=limit
     )
 
     print(f"Number of properties: {len(properties)}")
 
+    # filter out unnecessary fields 
+    properties = properties[importantFields]
+
+    # get values instead of dictionaries
     properties = properties.applymap(lambda x: x['0'] if isinstance(x, dict) else x)
+    
+    # replace inf/nan values before converting to json
+    properties.replace([np.inf, -np.inf], np.nan, inplace=True)
+    properties.fillna(0, inplace=True)
 
     # print(column_names)
     json_data = properties.to_dict(orient="records")
 
-
-    print(properties.head())
     return json_data
