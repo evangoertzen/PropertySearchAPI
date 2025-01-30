@@ -1,7 +1,7 @@
 from homeharvest import scrape_property
-from datetime import datetime
-
+import random
 import numpy as np
+import calculator as calc
 
 # allFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id', 'status', 'text', 
 #              'style', 'full_street_line', 'street', 'unit', 'city', 'state', 'zip_code', 'beds',
@@ -37,17 +37,22 @@ def propSearch(location: str, limit: int):
         limit=limit
     )
 
-    print(f"Number of properties: {len(properties)}")
+    # print(f"Number of properties: {len(properties)}")
 
     # filter out unnecessary fields 
     properties = properties[importantFields]
 
     # get values instead of dictionaries
-    properties = properties.applymap(lambda x: x['0'] if isinstance(x, dict) else x)
+    properties = properties.map(lambda x: x['0'] if isinstance(x, dict) else x)
     
     # replace inf/nan values before converting to json
     properties.replace([np.inf, -np.inf], np.nan, inplace=True)
     properties.fillna(0, inplace=True)
+
+
+    # add rent and cash_flow for each property
+    properties['rent'] = properties.apply(calc.getRent, axis=1)
+    properties['cash_flow'] = properties.apply(calc.calcCashFlow, axis=1)
 
     # print(column_names)
     json_data = properties.to_dict(orient="records")
