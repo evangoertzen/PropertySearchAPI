@@ -50,9 +50,11 @@ def propSearch(location: str, limit: int):
     properties.fillna(0, inplace=True)
 
 
+    # TODO: Add other metrics that I'll use later for analysis like NOI, mortgage payment, etc
+    # or is it better to pass all of the elemental values to the front end and do analysis there?
     # add rent and cash_flow for each property
     properties['rent'] = properties.apply(calc.getRent, axis=1)
-    properties['cash_flow'] = properties.apply(calc.calcCashFlow, axis=1)
+    # properties['cash_flow'] = properties.apply(calc.calcCashFlow, axis=1)
 
     # print(column_names)
     json_data = properties.to_dict(orient="records")
