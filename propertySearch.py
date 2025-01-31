@@ -22,11 +22,11 @@ importantFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id',
              'price_per_sqft', 'latitude', 'longitude', 'county', 'hoa_fee', 'nearby_schools',
              'primary_photo']
 
-def propSearch(location: str, limit: int):
+def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingType: str):
 
     properties = scrape_property(
         location=location,
-        listing_type="for_sale",  # or (for_sale, for_rent, pending)
+        listing_type=listingType,  # or (for_sale, for_rent, pending)
         past_days=30,  # sold in last 30 days - listed in last 30 days if (for_sale, for_rent)
         extra_property_data=True,
         # property_type=['single_family','multi_family'],
@@ -48,6 +48,8 @@ def propSearch(location: str, limit: int):
     # replace inf/nan values before converting to json
     properties.replace([np.inf, -np.inf], np.nan, inplace=True)
     properties.fillna(0, inplace=True)
+
+    properties = properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice)]
 
 
     # TODO: Add other metrics that I'll use later for analysis like NOI, mortgage payment, etc

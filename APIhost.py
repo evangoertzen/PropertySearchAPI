@@ -20,8 +20,8 @@ def get_random_number():
     return {"random_number": random.randint(1, 100)}
 
 @app.get("/getProperties")
-def get_properties(location: str, limit: int):
-    # return {"properties": ps.propSearch(location, limit)}
+def get_properties(location: str, limit: int, minPrice: int, maxPrice: int, listingType: str):
+    return {"properties": ps.propSearch(location, limit, minPrice, maxPrice, listingType)}
     json_text = '''
     {
     "properties": [
