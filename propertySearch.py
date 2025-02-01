@@ -1,7 +1,9 @@
 from homeharvest import scrape_property
+from sampleHousingData import DATA
 import random
 import numpy as np
 import calculator as calc
+import pandas as pd
 
 # allFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id', 'status', 'text', 
 #              'style', 'full_street_line', 'street', 'unit', 'city', 'state', 'zip_code', 'beds',
@@ -24,20 +26,30 @@ importantFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id',
 
 def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingType: str):
 
-    properties = scrape_property(
-        location=location,
-        listing_type=listingType,  # or (for_sale, for_rent, pending)
-        past_days=30,  # sold in last 30 days - listed in last 30 days if (for_sale, for_rent)
-        extra_property_data=True,
-        # property_type=['single_family','multi_family'],
-        # date_from="2023-05-01", # alternative to past_days
-        # date_to="2023-05-28",
-        # foreclosure=True
-        # mls_only=True,  # only fetch MLS listings
-        limit=limit
-    )
 
-    # print(f"Number of properties: {len(properties)}")
+    # properties = scrape_property(
+    #     location=location,
+    #     # listing_type=listingType,  # for_sale, for_rent, pending
+    #     past_days=30,  # sold in last 30 days - listed in last 30 days if (for_sale, for_rent)
+    #     extra_property_data=True,
+    #     # property_type=['single_family','multi_family'],
+    #     # date_from="2023-05-01", # alternative to past_days
+    #     # date_to="2023-05-28",
+    #     # foreclosure=True
+    #     # mls_only=True,  # only fetch MLS listings
+    #     limit=limit
+    # )
+
+    # load fake properties so I don't have to keep querying apartments.com
+    properties = getFakeProperties()
+
+    # use this to write to a file if you want to store/use fake data without querying
+    # # Convert to dictionary
+    # df_dict = properties.to_dict(orient='list')
+    # # Write to a Python file
+    # with open("data.py", "w") as f:
+    #     f.write(f"DATA = {df_dict}")
+
 
     # filter out unnecessary fields 
     properties = properties[importantFields]
@@ -52,13 +64,15 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
     properties = properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice)]
 
 
-    # TODO: Add other metrics that I'll use later for analysis like NOI, mortgage payment, etc
-    # or is it better to pass all of the elemental values to the front end and do analysis there?
-    # add rent and cash_flow for each property
+    # add rent for each property
     properties['rent'] = properties.apply(calc.getRent, axis=1)
-    # properties['cash_flow'] = properties.apply(calc.calcCashFlow, axis=1)
 
-    # print(column_names)
+    # get in json format
     json_data = properties.to_dict(orient="records")
 
     return json_data
+
+# propSearch('Denver', 10000, 0, 10000000, 'nothin')
+
+def getFakeProperties():
+    return pd.DataFrame(DATA)
