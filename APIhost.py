@@ -22,3 +22,7 @@ def get_random_number():
 @app.get("/getProperties")
 def get_properties(location: str, limit: int, minPrice: int, maxPrice: int, listingType: str):
     return {"properties": ps.propSearch(location, limit, minPrice, maxPrice, listingType)}
+
+@app.get("/getRent")
+def get_rent(address: str):
+    return ps.calcRent(address)
