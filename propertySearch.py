@@ -47,7 +47,7 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
     # # Convert to dictionary
     # df_dict = properties.to_dict(orient='list')
     # # Write to a Python file
-    # with open("data.py", "w") as f:
+    # with open("sampleHousingData.py", "w") as f:
     #     f.write(f"DATA = {df_dict}")
 
 
@@ -59,20 +59,21 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
     
     # replace inf/nan values before converting to json
     properties.replace([np.inf, -np.inf], np.nan, inplace=True)
-    properties.fillna(0, inplace=True)
-
+    properties.fillna('', inplace=True)
+   
     properties = properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice)]
 
 
     # add rent for each property
-    properties['rent'] = properties.apply(calc.getRent, axis=1)
+    # properties['rent'] = properties.apply(calc.getRent, axis=1)
 
     # get in json format
     json_data = properties.to_dict(orient="records")
 
     return json_data
 
-# propSearch('Denver', 10000, 0, 10000000, 'nothin')
 
 def getFakeProperties():
     return pd.DataFrame(DATA)
+
+# print(propSearch('Denver', 10000, 0, 10000000, 'nothin'))
