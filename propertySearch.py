@@ -1,3 +1,4 @@
+import time
 from homeharvest import scrape_property
 from sampleHousingData import DATA
 import random
@@ -78,6 +79,7 @@ def getFakeProperties():
 
 def calcRent(address: str):
     print("Calculating rent for address: " + address)
+    time.sleep(1)
     return random.randint(1000, 5000)
 
 # print(propSearch('Denver', 10000, 0, 10000000, 'nothin'))
