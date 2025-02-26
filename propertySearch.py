@@ -60,6 +60,9 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
         # filter out unnecessary fields 
         properties = properties[importantFields]
 
+        # filter out properties with no longitude or latitude
+        properties = properties.dropna(subset=['longitude', 'latitude'])
+
         # get values instead of dictionaries
         properties = properties.map(lambda x: x['0'] if isinstance(x, dict) else x)
         
