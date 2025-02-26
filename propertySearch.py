@@ -52,7 +52,7 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
             # date_to="2023-05-28",
             # foreclosure=True
             # mls_only=True,  # only fetch MLS listings
-            limit=min(500)
+            limit=500
         )
 
         properties = properties.head(limit)
