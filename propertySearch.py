@@ -65,11 +65,12 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
         # replace inf/nan values before converting to json
         properties.replace([np.inf, -np.inf], np.nan, inplace=True)
         properties.fillna('', inplace=True)
-    
-        properties = properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice)]
 
         # save json file
         properties.to_json(file_path, orient="records", indent=4)
+    
+        properties = properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice)]
+
         json_dict = properties.to_dict(orient="records")
 
         return json_dict
