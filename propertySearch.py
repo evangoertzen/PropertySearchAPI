@@ -1,3 +1,5 @@
+import json
+import os
 import time
 from homeharvest import scrape_property
 from sampleHousingData import DATA
@@ -27,55 +29,54 @@ importantFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id',
 
 def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingType: str):
 
+    file_path = "PropertyData/" + location +".json"
 
-    # properties = scrape_property(
-    #     location=location,
-    #     # listing_type=listingType,  # for_sale, for_rent, pending
-    #     past_days=30,  # sold in last 30 days - listed in last 30 days if (for_sale, for_rent)
-    #     extra_property_data=True,
-    #     # property_type=['single_family','multi_family'],
-    #     # date_from="2023-05-01", # alternative to past_days
-    #     # date_to="2023-05-28",
-    #     # foreclosure=True
-    #     # mls_only=True,  # only fetch MLS listings
-    #     limit=limit
-    # )
+    four_hours_ago = time.time() - (4 * 3600)
 
-    # load fake properties so I don't have to keep querying apartments.com
-    properties = getFakeProperties()
-
-    # use this to write to a file if you want to store/use fake data without querying
-    # # Convert to dictionary
-    # df_dict = properties.to_dict(orient='list')
-    # # Write to a Python file
-    # with open("sampleHousingData.py", "w") as f:
-    #     f.write(f"DATA = {df_dict}")
-
-
-    # filter out unnecessary fields 
-    properties = properties[importantFields]
-
-    # get values instead of dictionaries
-    properties = properties.map(lambda x: x['0'] if isinstance(x, dict) else x)
+    #If file was saved in the last 4 hours, load it. Otherwise
+    if os.path.exists(file_path) and os.path.getmtime(file_path) > four_hours_ago:
+        
+        with open(file_path, "r") as file:
+            return json.load(file)
+        return {}
     
-    # replace inf/nan values before converting to json
-    properties.replace([np.inf, -np.inf], np.nan, inplace=True)
-    properties.fillna('', inplace=True)
-   
-    properties = properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice)]
+    else:
+
+        properties = scrape_property(
+            location=location,
+            # listing_type=listingType,  # for_sale, for_rent, pending
+            past_days=30,  # sold in last 30 days - listed in last 30 days if (for_sale, for_rent)
+            extra_property_data=True,
+            # property_type=['single_family','multi_family'],
+            # date_from="2023-05-01", # alternative to past_days
+            # date_to="2023-05-28",
+            # foreclosure=True
+            # mls_only=True,  # only fetch MLS listings
+            limit=min(limit, 500)
+        )
 
 
-    # add rent for each property
-    # properties['rent'] = properties.apply(calc.getRent, axis=1)
+        # filter out unnecessary fields 
+        properties = properties[importantFields]
 
-    # get in json format
-    json_data = properties.to_dict(orient="records")
+        # get values instead of dictionaries
+        properties = properties.map(lambda x: x['0'] if isinstance(x, dict) else x)
+        
+        # replace inf/nan values before converting to json
+        properties.replace([np.inf, -np.inf], np.nan, inplace=True)
+        properties.fillna('', inplace=True)
+    
+        properties = properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice)]
 
-    return json_data
+        # save json file
+        properties.to_json(file_path, orient="records", indent=4)
+        json_dict = properties.to_dict(orient="records")
+
+        return json_dict
 
 
-def getFakeProperties():
-    return pd.DataFrame(DATA)
+# def getFakeProperties():
+#     return pd.DataFrame(DATA)
 
 def calcRent(address: str):
     print("Calculating rent for address: " + address)
