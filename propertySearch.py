@@ -27,8 +27,8 @@ importantFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id',
              'price_per_sqft', 'latitude', 'longitude', 'county', 'hoa_fee', 'nearby_schools',
              'primary_photo']
 
-def filter_df(properties, minPrice, maxPrice):
-    return properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice)]
+def filter_df(properties, minPrice, maxPrice, status):
+    return properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice) & (properties['status']==status)]
 
 def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingType: str):
 
@@ -41,7 +41,7 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
         
         with open(file_path, "r") as file:
             properties = pd.read_json(file_path, orient="records")
-            properties = filter_df(properties, minPrice, maxPrice)
+            properties = filter_df(properties, minPrice, maxPrice, listingType)
             return properties.to_dict(orient="records")
         return {}
     
@@ -78,7 +78,7 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
         # save json file
         properties.to_json(file_path, orient="records", indent=4)
     
-        properties = filter_df(properties, minPrice, maxPrice)
+        properties = filter_df(properties, minPrice, maxPrice, listingType)
 
         return properties.to_dict(orient="records")
 
