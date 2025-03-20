@@ -28,7 +28,9 @@ importantFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id',
              'primary_photo']
 
 def filter_df(properties, minPrice, maxPrice, status):
-    return properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice) & (properties['status']==status)]
+    if status:
+        return properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice) & (properties['status']==status)]
+    return properties[(properties['list_price'] <= maxPrice) & (properties['list_price'] >= minPrice)]
 
 def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingType: str):
 
