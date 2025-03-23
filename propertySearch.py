@@ -88,8 +88,9 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
 # def getFakeProperties():
 #     return pd.DataFrame(DATA)
 
-def calcRent(address: str):
+def calcRent(address: str, apiKey: str):
     print("Calculating rent for address: " + address)
+    print("API Key: " + apiKey)
     time.sleep(1)
     return random.randint(1000, 5000)
 
