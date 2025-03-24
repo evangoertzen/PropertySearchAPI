@@ -175,3 +175,6 @@ cython_debug/
 
 #PropertyData directory
 PropertyData/
+
+#counter file to limit requests
+counter.json
