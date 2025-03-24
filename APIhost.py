@@ -20,5 +20,5 @@ def get_properties(location: str, limit: int, minPrice: int, maxPrice: int, list
     return {"properties": ps.propSearch(location, limit, minPrice, maxPrice, listingType)}
 
 @app.get("/getRent")
-def get_rent(address: str, apiKey: str):
-    return ps.calcRent(address, apiKey)
+def get_rent(address: str, apiKey: str, propertyType: str, bedrooms: str, bathrooms: str, squareFootage: str):
+    return ps.calcRent(address, apiKey, propertyType, bedrooms, bathrooms, squareFootage)

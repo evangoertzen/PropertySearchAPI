@@ -2,11 +2,11 @@ import json
 import os
 import time
 from homeharvest import scrape_property
-from sampleHousingData import DATA
 import random
 import numpy as np
 import calculator as calc
 import pandas as pd
+import requests
 
 # allFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id', 'status', 'text', 
 #              'style', 'full_street_line', 'street', 'unit', 'city', 'state', 'zip_code', 'beds',
@@ -26,6 +26,40 @@ importantFields = ['property_url', 'property_id', 'listing_id', 'mls', 'mls_id',
              'list_date', 'assessed_value', 'estimated_value', 'tax', 'tax_history', 'lot_sqft',
              'price_per_sqft', 'latitude', 'longitude', 'county', 'hoa_fee', 'nearby_schools',
              'primary_photo']
+
+COUNTER_FILE = "counter.json"
+
+# Load the counter from file
+def load_counter():
+    if not os.path.exists(COUNTER_FILE):
+        return {"count": 0, "month": time.localtime().tm_mon}
+    
+    with open(COUNTER_FILE, "r") as f:
+        return json.load(f)
+
+# Save counter to file
+def save_counter(data):
+    with open(COUNTER_FILE, "w") as f:
+        json.dump(data, f)
+
+#Increment the counter, reset if a new month starts, and return the new count
+def increment_request_counter():
+    data = load_counter()
+    current_month = time.localtime().tm_mon
+
+    if data["month"] != current_month:
+        data["count"] = 0  # Reset counter if a new month starts
+        data["month"] = current_month
+
+    data["count"] += 1
+    save_counter(data)
+
+    return data["count"]
+
+# Get counter as raw value
+def get_counter():
+    data = load_counter()
+    return data["count"]
 
 def filter_df(properties, minPrice, maxPrice, status):
     if status:
@@ -85,13 +119,44 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
         return properties.to_dict(orient="records")
 
 
-# def getFakeProperties():
-#     return pd.DataFrame(DATA)
+def calcRent(address: str, apiKey: str, propertyType: str, bedrooms: str, bathrooms: str, squareFootage: str):
 
-def calcRent(address: str, apiKey: str):
+    url = "https://api.rentcast.io/v1/avm/rent/long-term"
+
+    params = {
+        "address": address,
+        "propertyType": propertyType,
+        "bedrooms": bedrooms,
+        "bathrooms": bathrooms,
+        "squareFootage": squareFootage,
+    }
+
+    headers = {
+        "accept": "application/json",
+        "X-Api-Key": apiKey
+    }
+    
     print("Calculating rent for address: " + address)
     print("API Key: " + apiKey)
-    time.sleep(1)
-    return random.randint(1000, 5000)
 
-# print(propSearch('Denver', 10000, 0, 10000000, 'nothin'))
+    # only make request if under free request limit. Otherwise return -1
+    if(get_counter() < 50):
+        response = requests.get(url, params=params, headers=headers)
+    else:
+        raise ValueError("You've used too many requests this month")
+
+
+    if response.status_code == 200:
+
+        increment_request_counter()
+        data = response.json()
+        rent = data.get("rent")
+        print(f"Estimated Rent: ${rent}")
+        return rent
+    
+    else:
+        print(f"Error: {response.status_code}, {response.text}")
+
+    time.sleep(1)
+    # return random.randint(1000, 5000)
+    return -1
