@@ -87,7 +87,6 @@ def propSearch(location: str, limit: int, minPrice: int, maxPrice: int, listingT
         properties = scrape_property(
             location=location,
             # listing_type=listingType,  # for_sale, for_rent, pending
-            past_days=30,  # sold in last 30 days - listed in last 30 days if (for_sale, for_rent)
             extra_property_data=True,
             # property_type=['single_family','multi_family'],
             # date_from="2023-05-01", # alternative to past_days
