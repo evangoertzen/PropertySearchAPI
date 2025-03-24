@@ -32,7 +32,7 @@ COUNTER_FILE = "counter.json"
 # Load the counter from file
 def load_counter():
     if not os.path.exists(COUNTER_FILE):
-        return {"count": 0, "month": time.localtime().tm_mon}
+        return {"count": 0, "last_reset": time.time()}
     
     with open(COUNTER_FILE, "r") as f:
         return json.load(f)
@@ -42,14 +42,15 @@ def save_counter(data):
     with open(COUNTER_FILE, "w") as f:
         json.dump(data, f)
 
-#Increment the counter, reset if a new month starts, and return the new count
+# Increment the counter, reset if 30 days have passed, and return the new count
 def increment_request_counter():
     data = load_counter()
-    current_month = time.localtime().tm_mon
+    current_time = time.time()
+    days_since_reset = (current_time - data["last_reset"]) / (60 * 60 * 24)  # Convert seconds to days
 
-    if data["month"] != current_month:
-        data["count"] = 0  # Reset counter if a new month starts
-        data["month"] = current_month
+    if days_since_reset >= 31:
+        data["count"] = 0  # Reset counter if 31 days have passed
+        data["last_reset"] = current_time  # Update last reset timestamp
 
     data["count"] += 1
     save_counter(data)
